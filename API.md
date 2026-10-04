@@ -74,26 +74,5 @@ Error umum: `400 stok ... tidak cukup`, `400 menu ... tidak tersedia di kantin i
 **PATCH /vendor/orders/:id/status** `{"status":"preparing"}`
 Hanya boleh berurutan: paid -> preparing -> ready -> completed.
 
-## Coba cepat dengan curl (mode mock)
-```bash
-B=http://localhost:8080/api
-# 1. login admin, buat kantin
-ADM=$(curl -s -X POST $B/login -H 'Content-Type: application/json' -d '{"email":"admin@kampus.ac.id","password":"ganti-password-admin"}')
-echo $ADM   # salin nilai token ke ADMIN_TOKEN
-curl -s -X POST $B/admin/vendors -H "Authorization: Bearer ADMIN_TOKEN" -H 'Content-Type: application/json' \
-  -d '{"name":"Bu Sari","email":"sari@kantin.id","password":"rahasia123","store_name":"Kantin Bu Sari"}'
-# 2. login kantin, tambah menu
-curl -s -X POST $B/login -H 'Content-Type: application/json' -d '{"email":"sari@kantin.id","password":"rahasia123"}'
-curl -s -X POST $B/vendor/menus -H "Authorization: Bearer VENDOR_TOKEN" -H 'Content-Type: application/json' \
-  -d '{"name":"Nasi Ayam Geprek","price":15000,"stock":20}'
-# 3. daftar mahasiswa, pesan, bayar (mock)
-curl -s -X POST $B/register -H 'Content-Type: application/json' -d '{"name":"Rina","email":"rina@kampus.ac.id","password":"rahasia123"}'
-curl -s -X POST $B/orders -H "Authorization: Bearer STUDENT_TOKEN" -H 'Content-Type: application/json' \
-  -d '{"vendor_id":1,"items":[{"menu_id":1,"qty":2}]}'
-curl -s -X POST $B/dev/pay/1 -H "Authorization: Bearer STUDENT_TOKEN"
-# 4. kantin proses pesanan
-curl -s -X PATCH $B/vendor/orders/1/status -H "Authorization: Bearer VENDOR_TOKEN" -H 'Content-Type: application/json' -d '{"status":"preparing"}'
-```
-
-## Sengaja belum ada (tahap berikutnya)
+## Belum ada (tahap berikutnya)
 Pencairan pendapatan via Xendit Disbursement, ledger saldo, dashboard admin, notifikasi push, hapus menu, upload foto menu, refresh token.
