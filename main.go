@@ -5,10 +5,9 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/glebarez/sqlite"
+	"gorm.io/driver/postgres"
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -22,13 +21,8 @@ func getenv(k, def string) string {
 }
 
 func connectDB() *gorm.DB {
-	var d gorm.Dialector
-	if os.Getenv("DB_DRIVER") == "mysql" {
-		d = mysql.Open(os.Getenv("DB_DSN"))
-	} else {
-		d = sqlite.Open(getenv("DB_DSN", "canteen.db"))
-	}
-	g, err := gorm.Open(d, &gorm.Config{})
+	dsn := os.Getenv("DB_DSN")
+	g, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("gagal konek database: ", err)
 	}
