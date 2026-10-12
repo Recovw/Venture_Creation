@@ -1,3 +1,10 @@
 .env
 *.db
 canteen-preorder
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!terraform.tfvars.example
+tfplan
+crash.log
