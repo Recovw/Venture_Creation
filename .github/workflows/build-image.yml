@@ -3,14 +3,16 @@ name: build-image
 on:
   workflow_dispatch:
 
-env:
-  IMAGE: ${{ vars.ACR_LOGIN_SERVER }}/kantin-api
-
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Tentukan nama image
+        env:
+          REGISTRY: ${{ vars.ACR_LOGIN_SERVER }}
+        run: echo "IMAGE=$(echo "$REGISTRY" | tr -d '[:space:]')/kantin-api" >> "$GITHUB_ENV"
 
       - name: Login ke ACR
         uses: docker/login-action@v3
@@ -20,7 +22,7 @@ jobs:
           password: ${{ secrets.ACR_PASSWORD }}
 
       - name: Build image
-        run: docker build -t $IMAGE:v1 -t $IMAGE:${{ github.sha }} .
+        run: docker build -t "$IMAGE:v1" -t "$IMAGE:${{ github.sha }}" .
 
       - name: Push image
-        run: docker push --all-tags $IMAGE
+        run: docker push --all-tags "$IMAGE"
