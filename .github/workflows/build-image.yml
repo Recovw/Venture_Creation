@@ -11,6 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Cek secret terbaca
+        env:
+          ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+        run: |
+          [ -n "$ACR_USERNAME" ] && echo "username: ada" || echo "username: KOSONG"
+          [ -n "$ACR_PASSWORD" ] && echo "password: ada" || echo "password: KOSONG"
 
       - name: Login ke ACR
         env:
