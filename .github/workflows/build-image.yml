@@ -1,0 +1,25 @@
+name: build-image
+
+on:
+  workflow_dispatch: 
+
+env:
+  IMAGE: ${{ vars.ACR_LOGIN_SERVER }}/kantin-api
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login ke ACR
+        env:
+          ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+        run: echo "$ACR_PASSWORD" | docker login ${{ vars.ACR_LOGIN_SERVER }} -u "$ACR_USERNAME" --password-stdin
+
+      - name: Build image
+        run: docker build -t $IMAGE:v1 -t $IMAGE:${{ github.sha }} .
+
+      - name: Push image
+        run: docker push --all-tags $IMAGE
