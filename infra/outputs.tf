@@ -4,8 +4,8 @@ output "app_url" {
 }
 
 output "xendit_webhook_url" {
-  description = "Isi di dashboard Xendit sebagai callback URL invoice"
-  value       = "https://${azurerm_container_app.api.ingress[0].fqdn}/api/webhooks/xendit/invoice"
+  description = "Isi di dashboard Xendit (Settings > Callbacks) sebagai callback URL pembayaran QR Code"
+  value       = "https://${azurerm_container_app.api.ingress[0].fqdn}/api/webhooks/xendit/qris"
 }
 
 output "acr_name" {
