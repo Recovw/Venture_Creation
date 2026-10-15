@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 func fail(c *gin.Context, code int, msg string) { c.JSON(code, gin.H{"error": msg}) }
@@ -63,8 +62,7 @@ func register(c *gin.Context) {
 		fail(c, 400, err.Error())
 		return
 	}
-	hash, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-	u := User{Name: req.Name, Email: strings.ToLower(req.Email), Password: string(hash), Role: RoleStudent}
+	u := User{Name: req.Name, Email: strings.ToLower(req.Email), Password: hashPassword(req.Password), Role: RoleStudent}
 	if err := db.Create(&u).Error; err != nil {
 		fail(c, 409, "email sudah terdaftar")
 		return
@@ -101,7 +99,12 @@ func me(c *gin.Context) {
 	c.JSON(200, u)
 }
 
-// Admin membuat akun vendor + profil kantin.
+func hashPassword(p string) string {
+	h, _ := bcrypt.GenerateFromPassword([]byte(p), bcrypt.DefaultCost)
+	return string(h)
+}
+
+// Admin membuat akun vendor + profil kantin (langsung terverifikasi).
 func adminCreateVendor(c *gin.Context) {
 	var req struct {
 		Name      string `json:"name" binding:"required"`
@@ -113,16 +116,8 @@ func adminCreateVendor(c *gin.Context) {
 		fail(c, 400, err.Error())
 		return
 	}
-	hash, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-	u := User{Name: req.Name, Email: strings.ToLower(req.Email), Password: string(hash), Role: RoleVendor}
-	vp := VendorProfile{StoreName: req.StoreName}
-	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(&u).Error; err != nil {
-			return err
-		}
-		vp.UserID = u.ID
-		return tx.Create(&vp).Error
-	})
+	vp := VendorProfile{StoreName: req.StoreName, Status: VendorApproved, IsOpen: true}
+	u, err := createVendorAccount(req.Name, req.Email, req.Password, &vp)
 	if err != nil {
 		fail(c, 409, "email sudah terdaftar")
 		return
