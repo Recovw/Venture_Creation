@@ -8,3 +8,4 @@ canteen-preorder
 !terraform.tfvars.example
 tfplan
 crash.loguploads/
+tmp/
