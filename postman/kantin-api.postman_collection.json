@@ -30,7 +30,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"mode mock\", () => pm.expect(pm.response.json().payment_mode).to.eql(\"mock\"));"
+                  "pm.test(\"mode bayar: \" + pm.response.json().payment_mode, () => pm.expect([\"mock\", \"xendit\"]).to.include(pm.response.json().payment_mode));"
                 ]
               }
             }
@@ -166,6 +166,44 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6a. Daftar mahasiswa (lewati kalau akun sudah ada)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Mahasiswa Demo\",\"email\":\"{{studentEmail}}\",\"password\":\"{{studentPassword}}\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// 201 = akun baru dibuat, 409 = email sudah terdaftar (tetap lanjut ke login)",
+                  "pm.test(\"terdaftar atau sudah ada\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code === 201) pm.collectionVariables.set(\"studentToken\", pm.response.json().token);"
                 ]
               }
             }
@@ -354,22 +392,10 @@
           ]
         },
         {
-          "name": "10. Simulasi bayar QRIS (mode mock)",
+          "name": "10. Bayar (simulasi) — mode mock & key test Xendit",
           "request": {
             "method": "POST",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/dev/payments/{{paymentId}}/pay",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "dev",
-                "payments",
-                "{{paymentId}}",
-                "pay"
-              ]
-            },
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -379,9 +405,70 @@
                   "type": "string"
                 }
               ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/dev/payments/{{paymentId}}/simulate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dev",
+                "payments",
+                "{{paymentId}}",
+                "simulate"
+              ]
             }
           },
           "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// mock: 200 langsung lunas; Xendit test: 202, status berubah setelah callback Xendit",
+                  "pm.test(\"simulasi diterima\", () => pm.expect(pm.response.code).to.be.oneOf([200, 202]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10b. Status setelah bayar (tunggu 5 detik)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/{{paymentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "{{paymentId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// beri waktu callback Xendit sampai ke server",
+                  "setTimeout(() => {}, 5000);"
+                ]
+              }
+            },
             {
               "listen": "test",
               "script": {
