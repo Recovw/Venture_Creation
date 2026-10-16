@@ -96,6 +96,9 @@ func main() {
 	student.GET("/orders", myOrders)
 	student.GET("/payments/:id", getPayment)
 	student.GET("/payments/:id/qr.png", paymentQR)
+	if mockMode() || xenditTestMode() {
+		student.POST("/dev/payments/:id/simulate", simulatePayment)
+	}
 	if mockMode() {
 		student.POST("/dev/payments/:id/pay", devPayPayment)
 		student.POST("/dev/pay/:id", devPay)

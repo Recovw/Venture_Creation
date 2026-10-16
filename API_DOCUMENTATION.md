@@ -149,6 +149,14 @@ Base URL: `http://localhost:8080/api` (lihat `API.md` untuk cara akses dari emul
 - Polling tiap 3 detik di layar bayar. **Response** `200`: `{"payment": {..., "orders": [...]}, "payment_mode": "mock"}`
 - `payment.status`: `pending` → `paid`, atau `expired` bila lewat `expires_at` (default 15 menit, env `PAYMENT_TTL_MINUTES`). Saat kedaluwarsa, stok dikembalikan otomatis.
 
+### `POST /api/dev/payments/:id/simulate` — tombol "Bayar (simulasi)" untuk demo di aplikasi
+- **Aktif** di mode mock **dan** saat `XENDIT_SECRET_KEY` adalah key test (`xnd_development_...`). Tidak ada (404) saat memakai key live.
+- **Mode mock**: pembayaran langsung lunas, response `200` `{"payment": {..."status":"paid"}}`.
+- **Mode test Xendit**: server meminta Xendit menyimulasikan pembayaran QR, lalu Xendit mengirim callback seperti pembayaran asli. Response `202` `{"payment": {..."status":"pending"}, "message": "..."}` — aplikasi **tetap polling** `GET /payments/:id` sampai `paid` (biasanya beberapa detik).
+- QR di mode test Xendit berisi teks contoh (`some-random-qr-string`), jadi tidak bisa discan e-wallet sungguhan; pakai endpoint ini saat demo.
+- **Error**: `400` `"pembayaran sudah paid|expired"`, `502` `"gagal simulasi pembayaran: ..."`.
+- Rekomendasi di aplikasi: tampilkan tombol ini hanya bila `GET /health` → `payment_mode` = `mock`, atau beri label "Sandbox".
+
 ### `POST /api/dev/payments/:id/pay` (hanya mode mock)
 - Simulasi QRIS berhasil dibayar → semua pesanan di dalamnya jadi `paid` + saldo masing-masing kantin bertambah.
 - **Error** `400` `"pembayaran sudah paid|expired"`.

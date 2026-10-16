@@ -323,6 +323,29 @@ func devPayPayment(c *gin.Context) {
 	c.JSON(200, gin.H{"payment": p})
 }
 
+// POST /dev/payments/:id/simulate: tombol "Bayar (simulasi)" untuk demo di aplikasi.
+// Mode mock: langsung lunas. Mode test Xendit: minta Xendit menyimulasikan pembayaran QR,
+// lalu status berubah lewat callback seperti pembayaran asli (aplikasi tinggal polling).
+func simulatePayment(c *gin.Context) {
+	if mockMode() {
+		devPayPayment(c)
+		return
+	}
+	p, ok := myPayment(c)
+	if !ok {
+		return
+	}
+	if p.Status != PaymentPending {
+		fail(c, 400, "pembayaran sudah "+p.Status)
+		return
+	}
+	if err := simulateQRIS(p.XenditID); err != nil {
+		fail(c, 502, "gagal simulasi pembayaran: "+err.Error())
+		return
+	}
+	c.JSON(202, gin.H{"payment": p, "message": "simulasi dikirim, status berubah setelah callback Xendit"})
+}
+
 // Versi lama: bayar berdasarkan id pesanan (melunasi seluruh pembayaran yang memuatnya).
 func devPay(c *gin.Context) {
 	var o Order

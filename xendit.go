@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -62,6 +63,17 @@ func createQRIS(externalID string, amount int64, expiresAt time.Time) (id, qrStr
 		"amount": amount, "expires_at": expiresAt.UTC().Format(time.RFC3339),
 	}, map[string]string{"api-version": "2022-07-31"}, &r)
 	return r.ID, r.QRString, err
+}
+
+// Hanya untuk key test: simulasi pembayaran QR tanpa scan sungguhan.
+func xenditTestMode() bool {
+	return strings.HasPrefix(os.Getenv("XENDIT_SECRET_KEY"), "xnd_development_")
+}
+
+func simulateQRIS(qrID string) error {
+	var r map[string]any
+	return xenditPost("https://api.xendit.co/qr_codes/"+qrID+"/payments/simulate", map[string]any{},
+		map[string]string{"api-version": "2022-07-31"}, &r)
 }
 
 func callbackTokenOK(c *gin.Context) bool {

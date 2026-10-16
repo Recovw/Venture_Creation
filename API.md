@@ -24,7 +24,7 @@ Env tambahan: `ADMIN_FEE` (default 2000), `PAYMENT_TTL_MINUTES` (default 15), `V
 3. Keranjang disimpan di app, **dipisah per kantin**. Detail menu menampilkan `addons` (telur, bawang goreng, dll) + kolom catatan.
 4. Checkout: `POST /checkout` (satu atau beberapa kantin sekaligus) -> dapat `payment`.
 5. Layar bayar: tampilkan gambar `GET /payments/{id}/qr.png`, hitung mundur ke `expires_at`, polling `GET /payments/{id}` tiap 3 detik.
-   - `mock`: tombol "Simulasi bayar" -> `POST /dev/payments/{id}/pay`.
+   - Demo (mode mock atau key test Xendit): tombol "Bayar (simulasi)" -> `POST /dev/payments/{id}/simulate`, lalu lanjut polling sampai `paid`.
 6. Layar pesanan: `GET /orders` tiap 5 detik sampai `ready`, tunjukkan `pickup_code` ke kantin.
 7. Kantin: daftar lewat `POST /vendors/register`, kelola menu + foto, `GET /vendor/orders`, `PATCH /vendor/orders/{id}/status`, cairkan saldo `POST /vendor/withdrawals`.
 8. Admin: verifikasi kantin & proses pencairan dana.
@@ -49,6 +49,7 @@ Status pesanan: `pending_payment` -> `paid` -> `preparing` -> `ready` -> `comple
 | GET | /orders/:id | login | Detail/status (pemilik, kantin terkait, admin) |
 | GET | /payments/:id | student | Status pembayaran + pesanan di dalamnya |
 | GET | /payments/:id/qr.png | student | Gambar QRIS |
+| POST | /dev/payments/:id/simulate | student | Tombol "Bayar (simulasi)" untuk demo: mode mock dan key test Xendit |
 | POST | /dev/payments/:id/pay | student | Hanya mode mock: simulasi QRIS dibayar |
 | GET, PUT | /vendor/profile | vendor | Profil, status verifikasi, saldo, rekening, buka/tutup |
 | POST | /vendor/upload | vendor | Upload foto (multipart `file`) |
