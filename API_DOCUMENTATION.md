@@ -256,13 +256,13 @@ Keduanya divalidasi lewat header `x-callback-token` = `XENDIT_CALLBACK_TOKEN`.
 
 ## 7. Data demo
 
-Jalankan dengan `SEED_DEMO=true` di database kosong untuk mengisi 4 kantin + 13 menu bergambar:
+Jalankan dengan `SEED_DEMO=true` untuk menambahkan 4 kantin + 13 menu bergambar beserta akun contoh. Aman untuk database yang sudah berisi data: setiap akun dicek per email, data lama tidak diubah, dan menjalankan ulang tidak membuat data ganda. Matikan lagi (`SEED_DEMO` kosong) bila akun demo tidak dibutuhkan, karena passwordnya umum.
 
 | Role | Email | Password |
 |---|---|---|
 | Mahasiswa | mahasiswa@demo.id | demo1234 |
 | Kantin | busari@demo.id, pakjoko@demo.id, kopikita@demo.id, sehat@demo.id | demo1234 |
-| Admin | admin@demo.id (hanya bila `ADMIN_EMAIL` tidak di-set) | admin1234 |
+| Admin | admin@demo.id | admin1234 |
 
 Gambar contoh ada di `assets/food/` dan disajikan di `/assets/food/<nama>.svg`.
 

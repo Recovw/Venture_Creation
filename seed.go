@@ -47,20 +47,28 @@ var demoVendors = []seedVendor{
 	}},
 }
 
-// seedDemo mengisi data contoh (SEED_DEMO=true) bila belum ada kantin sama sekali.
-func seedDemo() {
+func emailExists(email string) bool {
 	var n int64
-	db.Model(&VendorProfile{}).Count(&n)
-	if n > 0 {
-		return
-	}
-	var admins int64
-	db.Model(&User{}).Where("role = ?", RoleAdmin).Count(&admins)
-	if admins == 0 {
+	db.Model(&User{}).Where("email = ?", email).Count(&n)
+	return n > 0
+}
+
+// seedDemo (SEED_DEMO=true) menambahkan akun & kantin contoh yang belum ada, dicek per email,
+// jadi aman dijalankan berulang dan pada database yang sudah berisi data.
+func seedDemo() {
+	added := 0
+	if !emailExists("admin@demo.id") {
 		db.Create(&User{Name: "Admin Demo", Email: "admin@demo.id", Password: hashPassword("admin1234"), Role: RoleAdmin})
+		added++
 	}
-	db.Create(&User{Name: "Mahasiswa Demo", Email: "mahasiswa@demo.id", Password: hashPassword("demo1234"), Role: RoleStudent})
+	if !emailExists("mahasiswa@demo.id") {
+		db.Create(&User{Name: "Mahasiswa Demo", Email: "mahasiswa@demo.id", Password: hashPassword("demo1234"), Role: RoleStudent})
+		added++
+	}
 	for _, sv := range demoVendors {
+		if emailExists(sv.email) {
+			continue
+		}
 		vp := VendorProfile{StoreName: sv.store, Description: sv.desc, Location: sv.loc, ImageURL: sv.img,
 			Phone: "081234567890", Status: VendorApproved, IsOpen: true, BankName: "BCA",
 			BankAccountNo: "1234567890", BankAccountName: sv.owner}
@@ -68,11 +76,14 @@ func seedDemo() {
 			log.Println("seed:", err)
 			continue
 		}
+		added++
 		for _, sm := range sv.menus {
 			adds := append([]MenuAddon(nil), sm.addons...)
 			db.Create(&Menu{VendorID: vp.ID, Name: sm.name, Description: sm.desc, Category: sm.cat,
 				ImageURL: sm.img, Price: sm.price, Stock: 50, IsAvailable: true, Addons: adds})
 		}
 	}
-	log.Println("data demo dibuat: mahasiswa@demo.id / demo1234, busari@demo.id / demo1234, admin@demo.id / admin1234")
+	if added > 0 {
+		log.Println("data demo ditambahkan: mahasiswa@demo.id / demo1234, busari@demo.id / demo1234, admin@demo.id / admin1234")
+	}
 }

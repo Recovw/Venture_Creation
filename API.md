@@ -14,7 +14,7 @@ go run .
 ```
 Cek: `GET /api/health` -> `{"ok":true,"payment_mode":"mock"}`
 
-Isi data contoh (4 kantin, 13 menu bergambar): tambahkan `SEED_DEMO=true` di `.env` (database harus kosong).
+Isi data contoh (4 kantin, 13 menu bergambar): tambahkan `SEED_DEMO=true` di `.env` (boleh di database yang sudah berisi data, akun yang sudah ada dilewati).
 
 Env tambahan: `ADMIN_FEE` (default 2000), `PAYMENT_TTL_MINUTES` (default 15), `VENDOR_AUTO_APPROVE` (`true` = kantin baru langsung aktif), `UPLOAD_DIR` (default `./uploads`), `XENDIT_CALLBACK_TOKEN`.
 
