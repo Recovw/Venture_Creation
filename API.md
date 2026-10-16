@@ -66,7 +66,7 @@ Status pesanan: `pending_payment` -> `paid` -> `preparing` -> `ready` -> `comple
 | POST | /webhooks/xendit/qris | Xendit | Callback pembayaran QRIS |
 | POST | /webhooks/xendit/invoice | Xendit | Callback invoice (pesanan lama) |
 
-Detail request/response setiap endpoint ada di `API_DOCUMENTATION.md`.
+Detail request/response setiap endpoint ada di `API_DOCUMENTATION.md`; panduan layar per layar untuk tim mobile ada di `PANDUAN_MOBILE.md`.
 
 ## Belum ada (tahap berikutnya)
 Pencairan otomatis via Xendit Disbursement (sekarang admin transfer manual), penyimpanan foto di Blob Storage, notifikasi push, refresh token.
