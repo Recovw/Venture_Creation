@@ -67,6 +67,13 @@ Base URL: `http://localhost:8080/api` (lihat `API.md` untuk cara akses dari emul
 ### `GET /api/vendors/:id`
 - Detail satu kantin (kolom sama seperti di atas). `404` bila tidak ada / belum diverifikasi.
 
+### `GET /api/home?limit=10` — beranda
+- Publik. `limit` 1–30 (default 10).
+- **Response** `200`: `{"best_sellers": [Menu...], "vendors": [VendorProfile...]}`
+- `best_sellers` diurutkan dari porsi terjual terbanyak (`sold`), dihitung dari pesanan yang sudah dibayar (`paid`, `preparing`, `ready`, `completed`). Menu yang belum pernah terjual tetap tampil di bawahnya dengan `sold: 0`, jadi beranda tidak kosong saat aplikasi baru dipakai.
+- Setiap menu berbentuk sama seperti `GET /menus` (termasuk `image_url`, `store_name`, `vendor_open`, `addons`) ditambah `sold`.
+- `vendors` = daftar kantin yang sama dengan `GET /vendors`.
+
 ### `GET /api/menus?vendor_id=&q=&category=`
 - Semua parameter opsional. Tanpa parameter = semua menu tersedia dari semua kantin (cocok untuk beranda).
 - `q`: cari di nama menu, deskripsi menu, dan nama kantin (tidak peka huruf besar/kecil).

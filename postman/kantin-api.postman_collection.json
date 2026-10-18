@@ -79,6 +79,34 @@
           ]
         },
         {
+          "name": "2b. Beranda: menu terlaris + kantin",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/home",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "home"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"ada menu terlaris dan kantin\", () => { const d = pm.response.json(); pm.expect(d.best_sellers.length).to.be.above(0); pm.expect(d.vendors.length).to.be.above(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "3. Cari menu (search bar)",
           "request": {
             "method": "GET",

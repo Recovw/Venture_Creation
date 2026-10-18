@@ -67,7 +67,8 @@ Beranda langsung menampilkan menu bergambar; keranjang disimpan di aplikasi, dip
 | Kebutuhan layar | Endpoint |
 | --- | --- |
 | Daftar kantin (kartu dengan foto) | `GET /vendors` → `id, store_name, description, image_url, location, is_open` |
-| Semua menu untuk beranda | `GET /menus` |
+| Beranda: menu terlaris + daftar kantin | `GET /home` → `{"best_sellers": [...], "vendors": [...]}`; `best_sellers` urut dari `sold` terbanyak, maks 10 (`?limit=` sampai 30) |
+| Semua menu | `GET /menus` |
 | Search bar | `GET /menus?q=geprek` (cari di nama menu, deskripsi, dan nama kantin) |
 | Chip kategori | `GET /menus?category=minuman` |
 | Halaman satu kantin | `GET /vendors/{id}` + `GET /menus?vendor_id={id}` |

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -23,10 +24,34 @@ func myVendor(c *gin.Context) (VendorProfile, bool) {
 // ---------- publik ----------
 var publicVendorCols = []string{"id", "store_name", "description", "image_url", "location", "is_open", "status"}
 
-func listVendors(c *gin.Context) {
+func approvedVendors() []VendorProfile {
 	var vs []VendorProfile
 	db.Select(publicVendorCols).Where("status = ?", VendorApproved).Order("is_open desc, id").Find(&vs)
-	c.JSON(200, vs)
+	return vs
+}
+
+func listVendors(c *gin.Context) {
+	c.JSON(200, approvedVendors())
+}
+
+// GET /home?limit=10: beranda = menu terlaris (porsi terjual dari pesanan yang sudah dibayar) + daftar kantin.
+// Menu yang belum pernah terjual tetap muncul di bawahnya, jadi beranda tidak kosong di awal.
+func home(c *gin.Context) {
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	if err != nil || limit < 1 || limit > 30 {
+		limit = 10
+	}
+	paidStatuses := []string{StatusPaid, StatusPreparing, StatusReady, StatusCompleted}
+	var best []Menu
+	db.Model(&Menu{}).Preload("Addons").
+		Select("menus.*, vendor_profiles.store_name AS store_name, vendor_profiles.is_open AS vendor_open, COALESCE(s.sold, 0) AS sold").
+		Joins("JOIN vendor_profiles ON vendor_profiles.id = menus.vendor_id").
+		Joins(`LEFT JOIN (SELECT order_items.menu_id, SUM(order_items.qty) AS sold FROM order_items
+			JOIN orders ON orders.id = order_items.order_id WHERE orders.status IN ? GROUP BY order_items.menu_id) s
+			ON s.menu_id = menus.id`, paidStatuses).
+		Where("menus.is_available = ? AND vendor_profiles.status = ?", true, VendorApproved).
+		Order("sold DESC, vendor_profiles.is_open DESC, menus.id").Limit(limit).Find(&best)
+	c.JSON(200, gin.H{"best_sellers": best, "vendors": approvedVendors()})
 }
 
 func getVendor(c *gin.Context) {

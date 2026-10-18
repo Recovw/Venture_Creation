@@ -20,7 +20,7 @@ Env tambahan: `ADMIN_FEE` (default 2000), `PAYMENT_TTL_MINUTES` (default 15), `V
 
 ## Alur di aplikasi mobile
 1. Mahasiswa daftar/login -> simpan `token`. Arahkan halaman sesuai `user.role` (student / vendor / admin).
-2. Beranda: `GET /menus` (langsung semua menu bergambar) + `GET /vendors`. Search bar: `GET /menus?q=geprek`.
+2. Beranda: `GET /home` (menu terlaris bergambar + daftar kantin). Search bar: `GET /menus?q=geprek`.
 3. Keranjang disimpan di app, **dipisah per kantin**. Detail menu menampilkan `addons` (telur, bawang goreng, dll) + kolom catatan.
 4. Checkout: `POST /checkout` (satu atau beberapa kantin sekaligus) -> dapat `payment`.
 5. Layar bayar: tampilkan gambar `GET /payments/{id}/qr.png`, hitung mundur ke `expires_at`, polling `GET /payments/{id}` tiap 3 detik.
@@ -41,6 +41,7 @@ Status pesanan: `pending_payment` -> `paid` -> `preparing` -> `ready` -> `comple
 | POST | /vendors/register | publik | Pendaftaran kantin baru (menunggu verifikasi admin) |
 | GET | /vendors | publik | Daftar kantin terverifikasi |
 | GET | /vendors/:id | publik | Detail kantin |
+| GET | /home?limit=10 | publik | Beranda: menu terlaris + daftar kantin |
 | GET | /menus?vendor_id=&q=&category= | publik | Menu tersedia + gambar + tambahan; bisa dicari |
 | GET | /me | login | Data akun sendiri |
 | POST | /checkout | student | Checkout beberapa keranjang kantin, satu QRIS |

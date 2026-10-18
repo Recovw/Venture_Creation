@@ -95,6 +95,7 @@ type Menu struct {
 	// Hanya dibaca (hasil join), bukan kolom tabel menus.
 	StoreName  string `gorm:"->;-:migration" json:"store_name,omitempty"`
 	VendorOpen *bool  `gorm:"->;-:migration" json:"vendor_open,omitempty"`
+	Sold       *int64 `gorm:"->;-:migration" json:"sold,omitempty"` // jumlah porsi terjual (GET /home)
 }
 
 // Tambahan berbayar per menu, mis. telur, bawang goreng, keju.

@@ -82,6 +82,7 @@ func main() {
 	api.GET("/vendors", listVendors)
 	api.GET("/vendors/:id", getVendor)
 	api.GET("/menus", listMenus)
+	api.GET("/home", home)
 	api.POST("/webhooks/xendit/qris", xenditQRWebhook)
 	api.POST("/webhooks/xendit/invoice", xenditInvoiceWebhook)
 
