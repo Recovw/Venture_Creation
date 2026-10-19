@@ -146,7 +146,8 @@ Base URL: `http://localhost:8080/api` (lihat `API.md` untuk cara akses dari emul
        {"id":2,"vendor_id":2,"store_name":"Mie & Bakso Pak Joko","pickup_code":"V9N7","subtotal":13000,"admin_fee":0,"total":13000,"...":"..."}]}}
   ```
   Satu pesanan = satu kantin, masing-masing punya `pickup_code` sendiri.
-- **Error** `400`: `"menu {id} tidak tersedia di kantin ini"`, `"stok {nama} tidak cukup"`, `"tambahan tidak valid untuk {nama}"`, `"{kantin} sedang tutup"`, `"kantin tidak ditemukan"`, `"satu kantin hanya boleh satu keranjang per checkout"`, `"gagal membuat QRIS: ..."`
+- **Batas nominal**: total satu checkout maksimal Rp10.000.000 (batas QRIS dari Xendit). Bisa diperkecil dengan env `MAX_ORDER_AMOUNT` (mis. `500000`). Di atas batas → `400` `"total pembayaran Rp... melebihi batas maksimal Rp... per transaksi; ..."` dan stok tidak berkurang.
+- **Error** `400`: `"menu {id} tidak tersedia di kantin ini"`, `"stok {nama} tidak cukup"`, `"tambahan tidak valid untuk {nama}"`, `"{kantin} sedang tutup"`, `"kantin tidak ditemukan"`, `"satu kantin hanya boleh satu keranjang per checkout"`, `"gagal membuat QRIS, silakan coba lagi beberapa saat"` (detail error Xendit hanya dicatat di log server)
 
 ### `GET /api/payments/:id/qr.png`
 - Gambar PNG 512×512 QRIS yang langsung discan dengan GoPay/OVO/DANA/ShopeePay/m-banking.
@@ -204,7 +205,7 @@ Status pesanan: `pending_payment` → `paid` → `preparing` → `ready` → `co
   | Field | Wajib | Keterangan |
   |---|---|---|
   | name | ✅ | |
-  | price | ✅ | min 1 |
+  | price | ✅ | min 1, maks 10.000.000 (`"harga menu maksimal Rp10.000.000"`) |
   | stock | ❌ | default 0 |
   | description, category, image_url | ❌ | |
   | is_available | ❌ | default `true` |

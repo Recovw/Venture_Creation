@@ -108,6 +108,8 @@ Per kartu kantin, tampilkan pilihan **Bawa pulang / Makan di tempat** (`order_ty
 
 Balasan `201`: `{"payment": {"id", "amount", "status":"pending", "expires_at", "orders":[...]}, "payment_mode"}`. Simpan `payment.id`, hapus keranjang yang sudah dikirim, lalu buka layar pembayaran. Satu checkout = satu QRIS, berapa pun jumlah kantinnya; satu pesanan (`order`) per kantin, masing-masing dengan `pickup_code` sendiri.
 
+Total satu checkout maksimal Rp10.000.000 (batas QRIS). Tampilkan pesan error dari server apa adanya, misalnya `total pembayaran Rp16.003.230 melebihi batas maksimal Rp10.000.000 per transaksi; ...`, dan sarankan bayar per kantin.
+
 Error `400` yang perlu ditangani: `stok {nama} tidak cukup`, `{kantin} sedang tutup`, `menu {id} tidak tersedia di kantin ini`, `tambahan tidak valid untuk {nama}`. Tampilkan pesannya dan biarkan keranjang tetap ada.
 
 ## Layar pembayaran QRIS

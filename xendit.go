@@ -81,6 +81,27 @@ func callbackTokenOK(c *gin.Context) bool {
 	return want != "" && subtle.ConstantTimeCompare([]byte(c.GetHeader("x-callback-token")), []byte(want)) == 1
 }
 
+// Batas nominal QRIS per transaksi dari Xendit/aturan QRIS adalah Rp10.000.000.
+const qrisMaxAmount int64 = 10000000
+
+// MAX_ORDER_AMOUNT boleh lebih kecil (mis. 500000 untuk kantin), tidak boleh melebihi batas QRIS.
+func maxOrderAmount() int64 {
+	n, err := strconv.ParseInt(getenv("MAX_ORDER_AMOUNT", "10000000"), 10, 64)
+	if err != nil || n <= 0 || n > qrisMaxAmount {
+		return qrisMaxAmount
+	}
+	return n
+}
+
+// rupiah(53000) = "Rp53.000"
+func rupiah(n int64) string {
+	s := strconv.FormatInt(n, 10)
+	for i := len(s) - 3; i > 0; i -= 3 {
+		s = s[:i] + "." + s[i:]
+	}
+	return "Rp" + s
+}
+
 func adminFee() int64 {
 	n, err := strconv.ParseInt(getenv("ADMIN_FEE", "2000"), 10, 64)
 	if err != nil {

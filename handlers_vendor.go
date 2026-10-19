@@ -231,6 +231,10 @@ func vendorCreateMenu(c *gin.Context) {
 		fail(c, 400, err.Error())
 		return
 	}
+	if req.Price > qrisMaxAmount {
+		fail(c, 400, "harga menu maksimal "+rupiah(qrisMaxAmount))
+		return
+	}
 	m := Menu{VendorID: vp.ID, Name: req.Name, Description: req.Description, Category: req.Category,
 		ImageURL: req.ImageURL, Price: req.Price, Stock: req.Stock, IsAvailable: true, Addons: req.addons()}
 	if req.IsAvailable != nil {
@@ -253,6 +257,10 @@ func vendorUpdateMenu(c *gin.Context) {
 	var req menuReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		fail(c, 400, err.Error())
+		return
+	}
+	if req.Price > qrisMaxAmount {
+		fail(c, 400, "harga menu maksimal "+rupiah(qrisMaxAmount))
 		return
 	}
 	m.Name, m.Description, m.Category, m.ImageURL = req.Name, req.Description, req.Category, req.ImageURL

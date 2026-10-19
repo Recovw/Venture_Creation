@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -114,6 +115,11 @@ func placeOrders(uid uint, carts []cartReq) (*Payment, error) {
 			p.Amount += o.Total
 			p.Orders = append(p.Orders, o)
 		}
+		// Cek sebelum memanggil Xendit; error mengembalikan transaksi, jadi stok tidak berkurang.
+		if p.Amount > maxOrderAmount() {
+			return fmt.Errorf("total pembayaran %s melebihi batas maksimal %s per transaksi; kurangi jumlah pesanan atau bayar per kantin",
+				rupiah(p.Amount), rupiah(maxOrderAmount()))
+		}
 		return tx.Create(&p).Error
 	})
 	if err != nil {
@@ -123,7 +129,8 @@ func placeOrders(uid uint, carts []cartReq) (*Payment, error) {
 	id, qr, err := createQRIS(p.ExternalID, p.Amount, p.ExpiresAt)
 	if err != nil {
 		expirePayment(p.ExternalID)
-		return nil, fmt.Errorf("gagal membuat QRIS: %v", err)
+		log.Printf("gagal membuat QRIS %s: %v", p.ExternalID, err)
+		return nil, fmt.Errorf("gagal membuat QRIS, silakan coba lagi beberapa saat")
 	}
 	p.XenditID, p.QRString = id, qr
 	db.Model(&p).Updates(map[string]any{"xendit_id": id, "qr_string": qr})
