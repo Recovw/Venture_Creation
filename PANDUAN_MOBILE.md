@@ -92,7 +92,7 @@ Keranjang hanya disimpan di aplikasi (backend tidak menyimpan keranjang). Kelomp
 }
 ```
 
-Per kartu kantin, tampilkan pilihan **Bawa pulang / Makan di tempat** (`order_type`: `takeaway` / `dine_in`) dan **Ambil secepatnya / jam tertentu** (`pickup_time` null atau waktu ISO). Di bawah semua kartu: subtotal semua kantin + biaya layanan (`admin_fee` dari `/health`, dikenakan sekali per checkout) = total.
+Per kartu kantin, tampilkan pilihan **Bawa pulang / Makan di tempat** (`order_type`: `takeaway` / `dine_in`) dan **Ambil secepatnya / jam tertentu** (`pickup_time`: null = secepatnya; atau `"12:30"` untuk jam hari ini, `"2026-10-19T12:30:00"` tanpa zona dianggap WIB, atau ISO lengkap `"2026-10-19T12:30:00+07:00"`; keluaran `DateTime.toIso8601String()` Flutter juga diterima). Di bawah semua kartu: subtotal semua kantin + biaya layanan (`admin_fee` dari `/health`, dikenakan sekali per checkout) = total.
 
 ### Checkout
 

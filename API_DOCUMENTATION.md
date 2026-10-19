@@ -131,7 +131,7 @@ Base URL: `http://localhost:8080/api` (lihat `API.md` untuk cara akses dari emul
   | carts[].items[].addon_ids | ❌ | id dari `menu.addons` |
   | carts[].items[].note | ❌ | catatan untuk penjual, maks 200 karakter |
   | carts[].order_type | ❌ | `takeaway` (default) atau `dine_in` |
-  | carts[].pickup_time | ❌ | ISO8601; kosong = secepatnya |
+  | carts[].pickup_time | ❌ | kosong/null = secepatnya. Diterima: `"2026-10-19T12:30:00+07:00"`, `"2026-10-19T05:30:00Z"`, tanpa zona `"2026-10-19T12:30:00.000"` (dianggap WIB), `"2026-10-19 12:30"`, atau jam saja `"12:30"` (hari ini) |
 - **Proses**: cek kantin buka & disetujui → cek & kurangi stok → hitung harga (harga menu + tambahan) × qty → 1 `Order` per kantin → 1 `Payment` QRIS untuk semuanya. Biaya layanan (`ADMIN_FEE`, default Rp2.000) dikenakan **sekali per checkout** (dicatat di pesanan pertama).
 - **Response** `201`:
   ```json

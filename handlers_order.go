@@ -23,7 +23,7 @@ type orderItemReq struct {
 type cartReq struct {
 	VendorID   uint           `json:"vendor_id" binding:"required"`
 	Items      []orderItemReq `json:"items" binding:"required,min=1,dive"`
-	PickupTime *time.Time     `json:"pickup_time"`
+	PickupTime *flexTime      `json:"pickup_time"`
 	OrderType  string         `json:"order_type"`
 }
 
@@ -80,7 +80,7 @@ func placeOrders(uid uint, carts []cartReq) (*Payment, error) {
 	}
 
 	p := Payment{StudentID: uid, ExternalID: "pay-" + randHex(8), Method: "qris",
-		Status: PaymentPending, ExpiresAt: time.Now().Add(paymentTTL())}
+		Status: PaymentPending, ExpiresAt: time.Now().Add(paymentTTL()).Truncate(time.Second)}
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 		for i, ct := range carts {
@@ -97,7 +97,7 @@ func placeOrders(uid uint, carts []cartReq) (*Payment, error) {
 			}
 			o := Order{StudentID: uid, VendorID: vendor.ID, StoreName: vendor.StoreName, CustomerName: student.Name,
 				PickupCode: pickupCode(), OrderType: orderType, Status: StatusPendingPayment,
-				ExternalID: "order-" + randHex(8), PickupTime: ct.PickupTime}
+				ExternalID: "order-" + randHex(8), PickupTime: ct.PickupTime.Time()}
 			for _, it := range ct.Items {
 				item, err := buildItem(tx, vendor.ID, it)
 				if err != nil {

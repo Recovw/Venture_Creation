@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -29,7 +30,11 @@ func getenv(k, def string) string {
 
 func connectDB() *gorm.DB {
 	dsn := os.Getenv("DB_DSN")
-	g, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	g, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		// Presisi mikrodetik (sama dengan Postgres) supaya respons tidak berisi 9 digit pecahan detik
+		// yang ditolak sebagian parser tanggal di aplikasi mobile.
+		NowFunc: func() time.Time { return time.Now().Truncate(time.Microsecond) },
+	})
 	if err != nil {
 		log.Fatal("gagal konek database: ", err)
 	}
