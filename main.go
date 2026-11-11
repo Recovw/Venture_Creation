@@ -74,6 +74,7 @@ func main() {
 	go expireStalePayments()
 
 	r := gin.Default()
+	r.Use(cors())
 	r.MaxMultipartMemory = 4 << 20
 	api := r.Group("/api")
 	api.GET("/health", func(c *gin.Context) {

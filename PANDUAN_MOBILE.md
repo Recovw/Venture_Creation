@@ -267,3 +267,58 @@ Checklist sebelum hari demo:
 - [ ] Akun demo bisa login (mahasiswa, kantin, admin)
 - [ ] Alur kantin `paid` → `preparing` → `ready` → `completed` berjalan dari APK
 - [ ] Dua HP (mahasiswa dan kantin) siap, atau satu HP dengan logout di antara langkah
+
+## Frontend web (HTML, CSS, JS biasa)
+
+Backend bisa dipanggil langsung dari browser dengan `fetch`; CORS sudah diizinkan untuk semua origin (atur `CORS_ALLOWED_ORIGINS` di server untuk membatasinya, mis. `https://preeat.netlify.app,http://localhost:5500`). Semua endpoint dan alur di atas sama persis.
+
+```js
+const API = 'https://kantin-api.braveground-d38165d9.southeastasia.azurecontainerapps.io/api';
+const HOST = API.replace(/\/api$/, '');
+
+// Login, simpan token
+async function login(email, password) {
+  const r = await fetch(API + '/login', {method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({email, password})});
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error);
+  localStorage.setItem('token', d.token);
+  return d.user;
+}
+
+// Panggil endpoint yang butuh login
+async function api(path, options = {}) {
+  const r = await fetch(API + path, {...options, headers: {'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + localStorage.getItem('token'), ...(options.headers || {})}});
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error);
+  return d;
+}
+
+// Gambar menu: path relatif digabung dengan HOST
+const imgUrl = u => !u ? 'img/default.png' : (u.startsWith('http') ? u : HOST + u);
+
+// Gambar QRIS butuh header Authorization, jadi ambil sebagai blob
+async function showQR(paymentId, imgEl) {
+  const r = await fetch(`${API}/payments/${paymentId}/qr.png`,
+    {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}});
+  imgEl.src = URL.createObjectURL(await r.blob());
+}
+```
+
+Contoh alur bayar:
+
+```js
+const {payment} = await api('/checkout', {method: 'POST', body: JSON.stringify({carts: [
+  {vendor_id: 5, pickup_time: '12:30', items: [{menu_id: 4, qty: 1, addon_ids: [], note: 'tidak pedas'}]}]})});
+await showQR(payment.id, document.getElementById('qr'));
+// tombol "Bayar (simulasi)"
+await api(`/dev/payments/${payment.id}/simulate`, {method: 'POST'});
+// cek status tiap 3 detik
+const t = setInterval(async () => {
+  const {payment: p} = await api(`/payments/${payment.id}`);
+  if (p.status !== 'pending') { clearInterval(t); /* tampilkan pickup_code dari p.orders */ }
+}, 3000);
+```
+
+Catatan: buka halaman lewat server lokal (mis. Live Server di VS Code atau `python3 -m http.server`), bukan dengan klik dua kali file `index.html` (`file://`).
